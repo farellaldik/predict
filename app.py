@@ -104,7 +104,7 @@ def train_and_evaluate2(data):
     return mse, y_test, y_pred, next_price[0]
 
 # Function for model training and evaluation
-def train_and_evaluate3(data):
+def train_and_evaluate3(data): 
     # Step 3: Split the data into training and testing sets
     X = data[['Open', 'High', 'Low', 'Close']]  # Features
     y = data['Low']  # Target variable
