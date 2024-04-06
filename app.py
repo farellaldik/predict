@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 
 # Set page configuration to wide layout
 st.set_page_config(layout="wide")
@@ -52,13 +54,60 @@ st.components.v1.html("""
 # Function to load data from uploaded file
 def load_data(file):
     data = pd.read_csv(file)
-    return data
+    df_sorted = data.sort_values(by='Date')
+    # Reset index to remove auto-incremented index-like column
+    df_sorted = df_sorted.reset_index(drop=True)
+    return df_sorted
 
 # Function for model training and evaluation
 def train_and_evaluate(data):
     # Step 3: Split the data into training and testing sets
     X = data[['Open', 'High', 'Low', 'Close']]  # Features
     y = data['Close']  # Target variable
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Step 4: Train the model
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Step 5: Evaluate the model
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+
+    # Step 6: Make predictions
+    # Assuming you want to predict the next price based on the last row in the dataset
+    last_row = data.iloc[[-1]]
+    next_price = model.predict(last_row[['Open', 'High', 'Low', 'Close']])
+
+    return mse, y_test, y_pred, next_price[0]
+
+# Function for model training and evaluation
+def train_and_evaluate2(data):
+    # Step 3: Split the data into training and testing sets
+    X = data[['Open', 'High', 'Low', 'Close']]  # Features
+    y = data['High']  # Target variable
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Step 4: Train the model
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Step 5: Evaluate the model
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+
+    # Step 6: Make predictions
+    # Assuming you want to predict the next price based on the last row in the dataset
+    last_row = data.iloc[[-1]]
+    next_price = model.predict(last_row[['Open', 'High', 'Low', 'Close']])
+
+    return mse, y_test, y_pred, next_price[0]
+
+# Function for model training and evaluation
+def train_and_evaluate3(data):
+    # Step 3: Split the data into training and testing sets
+    X = data[['Open', 'High', 'Low', 'Close']]  # Features
+    y = data['Low']  # Target variable
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Step 4: Train the model
@@ -88,6 +137,20 @@ def main():
         # Display uploaded data in a table
         st.write("Uploaded Data:")
         st.write(data)
+        
+        # Train and evaluate the model
+        mse, y_test, y_pred, next_price = train_and_evaluate2(data)
+
+        # Display evaluation results
+        st.write("Mean Squared Error (High):", mse)
+        st.write("Predicted Next Price (High):", next_price)
+        
+        # Train and evaluate the model
+        mse, y_test, y_pred, next_price = train_and_evaluate3(data)
+
+        # Display evaluation results
+        st.write("Mean Squared Error (Low):", mse)
+        st.write("Predicted Next Price (Low):", next_price)
 
         # Train and evaluate the model
         mse, y_test, y_pred, next_price = train_and_evaluate(data)
